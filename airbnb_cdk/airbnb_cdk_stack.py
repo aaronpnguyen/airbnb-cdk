@@ -13,11 +13,9 @@ from aws_cdk import (
 from constructs import Construct
 
 class AirbnbCdkStack(cdk.Stack):
-
+    # Self refers to this specific stack!
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        
 
         ####################################
         #              Glue!               #
@@ -25,22 +23,24 @@ class AirbnbCdkStack(cdk.Stack):
 
         self.glue_db = aws_glue_alpha.Database(
             self,
-            "nguyen-airbnb-db-deployment", # Id as a string
-            database_name = "nguyen-airnb-db" # Name
+            "nguyen-airbnb-db-glue", # Id as a string
+            database_name = "nguyen-airbnb-db" # Name
         )
 
         ####################################
         #             Buckets!             #
         ####################################
 
-        s3_client = aws_s3.Bucket(self, "nguyen-airbnb-data-bucket")
+        # Deploying buckets that will contain either resources or transformed data
+        resource_bucket = aws_s3.Bucket(self, "nguyen-airbnb-resource-bucket")
+        data_bucket = aws_s3.Bucket(self, "nguyen-airbnb-data-bucket")
 
-        # Deploying resources to specified bucket
+        # Deploying resources to specified bucket(s)
         aws_s3_deployment.BucketDeployment(
             self,
             "nguyen-airbnb-deployment", # Name of bucket
             sources = [ # Sources must be directories or zip files
                 aws_s3_deployment.Source.asset("resources")
             ],
-            destination_bucket = s3_client # Where we send the resource
+            destination_bucket = resource_bucket # Where we send the resource
         )
