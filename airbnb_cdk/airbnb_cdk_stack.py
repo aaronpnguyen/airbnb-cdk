@@ -33,7 +33,7 @@ class AirbnbCdkStack(cdk.Stack):
         #             Buckets!             #
         ####################################
 
-        s3_client = aws_s3.Bucket(self, "nguyen-airnb-data-bucket")
+        s3_client = aws_s3.Bucket(self, "nguyen-airbnb-data-bucket")
 
         # Deploying resources to specified bucket
         aws_s3_deployment.BucketDeployment(
