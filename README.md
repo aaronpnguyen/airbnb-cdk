@@ -1,51 +1,18 @@
 
-# Welcome to your CDK Python project!
+# Setup for CDK projects
 
-This is a blank project for CDK development with Python.
+Setup required to create and deploy a CDK app:
+- Install AWS-CLI
+    - Set up config/credential files (AWS resets this every ~12 hours)
+- Install CDK
+    - Make sure we also have nvm installed, if not, install version 16
+    - Within project .venv, make sure we are using nvm 16 [`$ nvm use 16`]
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
-
-To manually create a virtualenv on MacOS and Linux:
-
-```
-$ python3 -m venv .venv
-```
-
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+# Getting Started
+To create a CDK project, here are the following steps:
+1. Create directory and cd into directory
+2. Initialize CDK application [`$ cdk init app --language python`]
+3. Activate virtual enviornment
 
 ## Useful commands
 
@@ -54,5 +21,3 @@ command.
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
-
-Enjoy!
