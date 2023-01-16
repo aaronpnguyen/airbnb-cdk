@@ -25,20 +25,22 @@ class AirbnbCdkStack(cdk.Stack):
 
         self.glue_db = aws_glue_alpha.Database(
             self,
-            "nguyen-airbnb-deployment", # Id as a string
-            database_name = "nguyen-airnb-database" # Name
+            "nguyen-airbnb-db-deployment", # Id as a string
+            database_name = "nguyen-airnb-db" # Name
         )
 
         ####################################
         #             Buckets!             #
         ####################################
 
-        s3_client = aws_s3.Bucket(self, "airnb-data-bucket")
+        s3_client = aws_s3.Bucket(self, "nguyen-airnb-data-bucket")
 
-        # Adding resource to bucket
+        # Deploying resources to specified bucket
         aws_s3_deployment.BucketDeployment(
             self,
-            "airbnb-deployment", # Name of bucket
-            sources = [aws_s3_deployment.Source.asset("resources")], # Must be zip/directory
-            destination_bucket = s3_client # Bucket we deploy too
+            "nguyen-airbnb-deployment", # Name of bucket
+            sources = [ # Sources must be directories or zip files
+                aws_s3_deployment.Source.asset("resources")
+            ],
+            destination_bucket = s3_client # Where we send the resource
         )
