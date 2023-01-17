@@ -1,12 +1,17 @@
 import sys
-import boto3
-from awsglue.context import GlueContext
-from awsglue.job import Job
+from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from pyspark.sql import DataFrame, SparkSession
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-def airbnb_script(resource_bucket, data_bucket):
+resource_bucket = os.getenv("resource_bucket")
+data_bucket = os.getenv("data_bucket")
+
+def main():
     """""
     This glue script utilizes 3 nodes and 2 buckets.
     The first bucket is our resource, where we grab the raw data.
@@ -30,7 +35,7 @@ def airbnb_script(resource_bucket, data_bucket):
 
     logger.info("Starting nguyen-airbnb-glue-job")
 
-    # Script generated for node S3 bucket
+    # Getting data from resource bucket
     resource_node = glue_context.create_dynamic_frame.from_options(
         format_options = {
             "quoteChar": '"',
@@ -77,4 +82,6 @@ def airbnb_script(resource_bucket, data_bucket):
     
     glue_job.commit()
     logger.info("Finished job!")
-    
+
+if __name__ == "__main__":
+    main()
