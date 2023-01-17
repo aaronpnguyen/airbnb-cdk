@@ -49,7 +49,7 @@ def airbnb_script(resource_bucket, data_bucket):
         transformation_ctx = "resource_node",
     )
 
-    # Script generated for node ApplyMapping
+    # Transform data from csv to table?
     mapping_node = ApplyMapping.apply(
         frame = resource_node,
         mappings = [
@@ -60,7 +60,7 @@ def airbnb_script(resource_bucket, data_bucket):
         transformation_ctx = "mapping_node",
     )
 
-    # Script generated for node S3 bucket
+    # Push transformed data into S3 bucket
     data_node = glue_context.getSink(
         path = data_bucket,
         connection_type = "s3",
@@ -77,3 +77,4 @@ def airbnb_script(resource_bucket, data_bucket):
     
     glue_job.commit()
     logger.info("Finished job!")
+    
