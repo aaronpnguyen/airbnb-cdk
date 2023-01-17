@@ -48,8 +48,8 @@ class AirbnbCdkStack(cdk.Stack):
         ####################################
 
         glue.Job(self, "nguyen-airbnb-price-job",
-            executable= glue.JobExecutable.python_shell(
-                glue_version = glue.GlueVersion.V1_0,
+            executable = glue.JobExecutable.python_etl(
+                glue_version = glue.GlueVersion.V3_0,
                 script = glue.Code.from_bucket(glue_bucket, 'airbnb_price_script.py'),
                 python_version = glue.PythonVersion.THREE,
             ),

@@ -4,12 +4,6 @@ from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
-from dotenv import load_dotenv
-import os
-load_dotenv()
-
-resource_bucket = os.getenv("resource_bucket")
-data_bucket = os.getenv("data_bucket")
 
 def main():
     """""
@@ -22,6 +16,11 @@ def main():
     which holds the scond bucket.
     
     """""
+
+    # Temp var
+    resource_bucket = None
+    data_bucket = None
+
     # Context build/setup
     spark_context = SparkContext()
     glue_context = GlueContext(spark_context)
@@ -47,7 +46,7 @@ def main():
         format = "csv",
         connection_options = {
             "paths": [
-                resource_bucket
+                resource_bucket.csv_file
             ],
             "recurse": True,
         },
