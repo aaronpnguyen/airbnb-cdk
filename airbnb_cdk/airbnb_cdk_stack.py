@@ -45,5 +45,3 @@ class AirbnbCdkStack(cdk.Stack):
             "nguyen-airbnb-db-glue", # Id as a string
             database_name = "nguyen-airbnb-db" # Name
         )
-
-        airbnb_script(resource_bucket, data_bucket)
