@@ -11,21 +11,12 @@ from aws_cdk import (
     aws_iam as iam
 )
 from constructs import Construct
+from src.airbnb_price.airbnb_price_script import airbnb_script
 
 class AirbnbCdkStack(cdk.Stack):
     # Self refers to this specific stack!
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        ####################################
-        #              Glue!               #
-        ####################################
-
-        self.glue_db = aws_glue_alpha.Database(
-            self,
-            "nguyen-airbnb-db-glue", # Id as a string
-            database_name = "nguyen-airbnb-db" # Name
-        )
 
         ####################################
         #             Buckets!             #
@@ -44,3 +35,15 @@ class AirbnbCdkStack(cdk.Stack):
             ],
             destination_bucket = resource_bucket # Where we send the resource
         )
+
+        ####################################
+        #              Glue!               #
+        ####################################
+
+        self.glue_db = aws_glue_alpha.Database(
+            self,
+            "nguyen-airbnb-db-glue", # Id as a string
+            database_name = "nguyen-airbnb-db" # Name
+        )
+
+        airbnb_script(resource_bucket, data_bucket)
