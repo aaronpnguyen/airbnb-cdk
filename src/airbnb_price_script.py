@@ -5,17 +5,40 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
-args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+args = getResolvedOptions(sys.argv, 
+    [
+        "JOB_NAME",
+        "resource_bucket",
+        "data_bucket"
+    ]
+)
+
+job_name = args["JOB_NAME"]
+resource_bucket = args["resource_bucket"]
+data_bucket = args["data_bucket"]
+
 sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
-job.init(args["JOB_NAME"], args)
+job.init(job_name, args)
 
 # Script generated for node S3 bucket
-S3bucket_node1 = glueContext.create_dynamic_frame.from_catalog(
-    database="nguyen-airbnb-db",
-    table_name="area-prices",
+S3bucket_node1 = glueContext.create_dynamic_frame.from_options(
+    format_options={
+        "quoteChar": '"',
+        "withHeader": True,
+        "separator": ",",
+        "optimizePerformance": False,
+    },
+    connection_type="s3",
+    format="csv",
+    connection_options={
+        "paths": [
+            f"{resource_bucket}/airbnb_price.csv"
+        ],
+        "recurse": True,
+    },
     transformation_ctx="S3bucket_node1",
 )
 
@@ -23,7 +46,7 @@ S3bucket_node1 = glueContext.create_dynamic_frame.from_catalog(
 ApplyMapping_node2 = ApplyMapping.apply(
     frame=S3bucket_node1,
     mappings=[
-        ("listing_id", "long", "listing_id", "long"),
+        ("listing_id", "string", "listing_id", "string"),
         ("price", "string", "price", "string"),
         ("nbhood_full", "string", "nbhood_full", "string"),
     ],
@@ -32,15 +55,15 @@ ApplyMapping_node2 = ApplyMapping.apply(
 
 # Script generated for node S3 bucket
 S3bucket_node3 = glueContext.getSink(
-    path="s3://nguyen-airbnb-stack-nguyenairbnbdatabucket5f319e0-8a4lg64btd1a",
+    path=data_bucket,
     connection_type="s3",
-    updateBehavior="UPDATE_IN_DATABASE",
+    updateBehavior="LOG",
     partitionKeys=[],
     enableUpdateCatalog=True,
     transformation_ctx="S3bucket_node3",
 )
 S3bucket_node3.setCatalogInfo(
-    catalogDatabase="nguyen-airbnb-db", catalogTableName="airbnb-pricing"
+    catalogDatabase="nguyen-airbnb-db", catalogTableName="airbnb-prices"
 )
 S3bucket_node3.setFormat("glueparquet")
 S3bucket_node3.writeFrame(ApplyMapping_node2)
