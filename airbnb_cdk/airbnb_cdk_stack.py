@@ -21,7 +21,9 @@ class AirbnbCdkStack(cdk.Stack):
         data_bucket = aws_s3.Bucket(self, "nguyen-airbnb-data-bucket")
         glue_bucket = aws_s3.Bucket(self, "nguyen-airbnb-glue-bucket")
 
-        # Deploying resources to specified bucket(s)
+        ####################################
+        #          Bucket Resources!       #
+        ####################################
 
         # Airbnb csv data
         aws_s3_deployment.BucketDeployment(
@@ -31,6 +33,15 @@ class AirbnbCdkStack(cdk.Stack):
                 aws_s3_deployment.Source.asset("resources")
             ],
             destination_bucket = resource_bucket # Where we send the resource
+        )
+
+        aws_s3_deployment.BucketDeployment(
+            self,
+            "nguyen-airbnb-data-deployment", # Name of bucket
+            sources = [ # Sources must be directories or zip files
+                aws_s3_deployment.Source.asset("transformed_data")
+            ],
+            destination_bucket = data_bucket # Where we send the resource
         )
 
         # Glue scripts
@@ -44,8 +55,14 @@ class AirbnbCdkStack(cdk.Stack):
         )
 
         ####################################
-        #             Resources!           #
+        #              Glue!               #
         ####################################
+
+        self.glue_db = glue.Database(
+            self,
+            "nguyen-airbnb-db-glue", # Id as a string
+            database_name = "nguyen-airbnb-db" # Name
+        )
 
         glue.Job(self, "nguyen-airbnb-price-job",
             executable = glue.JobExecutable.python_etl(
@@ -54,25 +71,4 @@ class AirbnbCdkStack(cdk.Stack):
                 python_version = glue.PythonVersion.THREE,
             ),
             description = "etl? shell? CDK testing"
-        )
-
-        # aws_glue.CfnJob(
-        #     scope,
-        #     "nguyen-airbnb-job",
-        #     name = "nguyen-airbnb-job",
-        #     command = aws_glue.CfnJob.JobCommandProperty(
-        #         name = "glueetl",
-        #         script_location = f"s3://{glue_bucket}/airbnb_price_script.py"
-        #     ),
-        #     glue_version = "3.0"
-        # )
-
-        ####################################
-        #              Glue!               #
-        ####################################
-
-        self.glue_db = glue.Database(
-            self,
-            "nguyen-airbnb-db-glue", # Id as a string
-            database_name = "nguyen-airbnb-db" # Name
         )
