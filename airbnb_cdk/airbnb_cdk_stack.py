@@ -49,6 +49,15 @@ class AirbnbCdkStack(cdk.Stack):
             destination_bucket = data_bucket # Where we send the resource
         )
 
+        aws_s3_deployment.BucketDeployment(
+            self,
+            "nguyen-airbnb-data-deployment", # Name of bucket
+            sources = [ # Sources must be directories or zip files
+                aws_s3_deployment.Source.asset("transformed_data")
+            ],
+            destination_bucket = data_bucket # Where we send the resource
+        )
+
         # Glue scripts
         aws_s3_deployment.BucketDeployment(
             self,
@@ -69,10 +78,15 @@ class AirbnbCdkStack(cdk.Stack):
             code = aws_lambda.Code.from_asset("lambdas")
         )
 
-
         ####################################
         #              Glue!               #
         ####################################
+
+        self.glue_db = glue.Database(
+            self,
+            "nguyen-airbnb-db-glue", # Id as a string
+            database_name = "nguyen-airbnb-db" # Name
+        )
 
         self.glue_db = glue.Database(
             self,
