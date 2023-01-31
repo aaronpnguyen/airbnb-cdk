@@ -63,9 +63,9 @@ class AirbnbCdkStack(cdk.Stack):
         #              Lambda!             #
         ####################################
 
-        aws_lambda.Function(self, "nguyen-test-lambda",
+        aws_lambda.Function(self, "airbnb_lambda",
             runtime = aws_lambda.Runtime.PYTHON_3_8,
-            handler = "airbnb_lambda",
+            handler = "airbnb_lambda.main",
             code = aws_lambda.Code.from_asset("lambdas")
         )
 
