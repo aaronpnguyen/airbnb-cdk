@@ -5,6 +5,7 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
+# This is passed in through "--default_arguments" in stack file
 args = getResolvedOptions(sys.argv, 
     [
         "JOB_NAME",
@@ -17,54 +18,59 @@ job_name = args["JOB_NAME"]
 resource_bucket = args["resource_bucket"]
 data_bucket = args["data_bucket"]
 
-sc = SparkContext()
-glueContext = GlueContext(sc)
+spark_context = SparkContext()
+glueContext = GlueContext(spark_context)
 spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(job_name, args)
 
-# Script generated for node S3 bucket
-S3bucket_node1 = glueContext.create_dynamic_frame.from_options(
-    format_options={
+# Identify resource bucket and file type
+resource_node = glueContext.create_dynamic_frame.from_options(
+    format_options = {
         "quoteChar": '"',
         "withHeader": True,
         "separator": ",",
         "optimizePerformance": False,
     },
-    connection_type="s3",
-    format="csv",
-    connection_options={
+    connection_type = "s3",
+    format = "csv",
+    connection_options = {
         "paths": [
-            f"{resource_bucket}/airbnb_price.csv"
+            f"{resource_bucket}/airbnb_price.csv" # Specify the file(s) it needs to grab
         ],
         "recurse": True,
     },
-    transformation_ctx="S3bucket_node1",
+    transformation_ctx = "resource_node",
 )
 
-# Script generated for node ApplyMapping
-ApplyMapping_node2 = ApplyMapping.apply(
-    frame=S3bucket_node1,
-    mappings=[
+# Based off of file type, list headers
+# (would probably want to find a way to automate this)
+transformation_node = ApplyMapping.apply(
+    frame = resource_node,
+    mappings = [
         ("listing_id", "string", "listing_id", "string"),
         ("price", "string", "price", "string"),
         ("nbhood_full", "string", "nbhood_full", "string"),
     ],
-    transformation_ctx="ApplyMapping_node2",
+    transformation_ctx = "transformation_node",
 )
 
-# Script generated for node S3 bucket
-S3bucket_node3 = glueContext.getSink(
-    path=data_bucket,
-    connection_type="s3",
-    updateBehavior="LOG",
-    partitionKeys=[],
-    enableUpdateCatalog=True,
-    transformation_ctx="S3bucket_node3",
+# Write transformed data into correct file type/format
+output_node = glueContext.getSink(
+    path = data_bucket,
+    connection_type = "s3",
+    updateBehavior = "LOG",
+    partitionKeys = [],
+    enableUpdateCatalog = True,
+    transformation_ctx = "output_node",
 )
-S3bucket_node3.setCatalogInfo(
+
+# Setting Glue catalog/database name
+output_node.setCatalogInfo(
     catalogDatabase="nguyen-airbnb-db", catalogTableName="airbnb-prices"
 )
-S3bucket_node3.setFormat("glueparquet")
-S3bucket_node3.writeFrame(ApplyMapping_node2)
+output_node.setFormat("glueparquet")
+output_node.writeFrame(transformation_node)
+
+# Finishing job
 job.commit()
