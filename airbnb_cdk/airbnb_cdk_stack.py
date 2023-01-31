@@ -87,6 +87,8 @@ class AirbnbCdkStack(cdk.Stack):
                 script = glue.Code.from_bucket(glue_bucket, 'airbnb_price_script.py'),
                 python_version = glue.PythonVersion.THREE,
             ),
+            # Passing in buckets, so we don't expose bucket urls
+            # Generally would like to keep them safe!
             default_arguments = {
                 "--resource_bucket": resource_url,
                 "--data_bucket": data_url
