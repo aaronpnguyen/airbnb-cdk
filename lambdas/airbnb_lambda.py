@@ -20,5 +20,4 @@ def main(event, context):
     return response
 
 if __name__ == "__main__":
-    # Testing purposes?
     main(None, None)

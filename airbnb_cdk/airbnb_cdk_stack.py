@@ -59,11 +59,27 @@ class AirbnbCdkStack(cdk.Stack):
             destination_bucket = glue_bucket
         )
 
+        s3_actions = [
+            "s3:ListBucket",
+            "s3:ListBuckets",
+            "s3:ListAllMyBuckets",
+            "s3:GetBucketLocation"
+        ]
+
+        s3_policy_statement = iam.PolicyStatement(
+            actions = [*s3_actions],
+            resources = [
+                resource_bucket.bucket_arn,
+                data_bucket.bucket_arn, 
+                glue_bucket.bucket_arn,
+            ]
+        )
+
         ####################################
         #              Lambda!             #
         ####################################
 
-        aws_lambda.Function(self, "airbnb_lambda",
+        airbnb_lambda = aws_lambda.Function(self, "airbnb_lambda",
             runtime = aws_lambda.Runtime.PYTHON_3_8,
             handler = "airbnb_lambda.main",
             code = aws_lambda.Code.from_asset("lambdas")
@@ -79,16 +95,12 @@ class AirbnbCdkStack(cdk.Stack):
             database_name = "nguyen-airbnb-db" # Name
         )
 
-        # For now we're assuming full access, but usually we'd want to implement
-        # The least amount of access
         glue.Job(self, "nguyen-airbnb-price-job",
             executable = glue.JobExecutable.python_etl(
                 glue_version = glue.GlueVersion.V3_0,
                 script = glue.Code.from_bucket(glue_bucket, 'airbnb_price_script.py'),
                 python_version = glue.PythonVersion.THREE,
             ),
-            # Passing in buckets, so we don't expose bucket urls
-            # Generally would like to keep them safe!
             default_arguments = {
                 "--resource_bucket": resource_url,
                 "--data_bucket": data_url
@@ -96,7 +108,6 @@ class AirbnbCdkStack(cdk.Stack):
             description = "airbnb-etl"
         )
 
-        """
         glue_read_actions = [
             "glue:GetConnection",
             "glue:GetDatabase",
@@ -105,7 +116,7 @@ class AirbnbCdkStack(cdk.Stack):
             "glue:GetTables",
         ]
 
-        glue_roles = iam.Role(
+        iam.Role(
             self,
             "nguyen-airbnb-etl-role",
             role_name = "nguyen-airbnb-etl",
@@ -117,16 +128,26 @@ class AirbnbCdkStack(cdk.Stack):
                             actions = [
                                 *glue_read_actions,
                                 "glue:CreateTable",
-                                "glue:DeleteTable"
+                                "glue:DeleteTable",
                             ],
-                            resources = [self.glue_db.catalog_arn, self.glue_db.database_arn]
+                            resources = [
+                                self.glue_db.catalog_arn,
+                                self.glue_db.database_arn
+                            ]
                         )
                     ]
                 )
             }
         )
-        """
 
+        glue_policy_statement = iam.PolicyStatement(
+            actions = glue_read_actions,
+            resources = [
+                self.glue_db.catalog_arn,
+                self.glue_db.database_arn
+            ]
+        )
+        
         ####################################
         #            DynamoDb!             #
         ####################################
@@ -139,5 +160,21 @@ class AirbnbCdkStack(cdk.Stack):
             removal_policy = cdk.RemovalPolicy.DESTROY,
             time_to_live_attribute = "ttl",
             partition_key = dynamodb.Attribute(name = "id", type = dynamodb.AttributeType.STRING),
-            sort_key = dynamodb.Attribute(name = "second_key", type = dynamodb.AttributeType.STRING)
+        )
+
+        test_table.grant_read_write_data(airbnb_lambda.role)
+
+        ####################################
+        #            Policies!             #
+        ####################################
+
+        iam.ManagedPolicy(
+            self,
+            "nguyen-airbnb-managed-policy",
+            document = iam.PolicyDocument(
+                statements=[
+                    glue_policy_statement,
+                    s3_policy_statement,
+                ]
+            )
         )
