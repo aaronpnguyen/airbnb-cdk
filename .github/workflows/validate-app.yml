@@ -1,0 +1,12 @@
+name: Airbnb-CDK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  - name: Tests
+  run: |
+    pytest
