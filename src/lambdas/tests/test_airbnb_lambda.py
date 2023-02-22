@@ -34,7 +34,7 @@ def test_main_put_called(boto_mock):
 
     table_mock.put_item.assert_called()
 
-
+@patch.dict(os.environ, {"DYNAMODB_TABLE": "table_name"})
 @patch("airbnb_lambda.boto3")
 def test_main_count_increased(boto_mock):
 
