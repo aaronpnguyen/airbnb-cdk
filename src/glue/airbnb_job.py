@@ -5,8 +5,7 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
-# This is passed in through "--default_arguments" in stack file
-args = getResolvedOptions(sys.argv, 
+job_args = getResolvedOptions(sys.argv, 
     [
         "JOB_NAME",
         "resource_bucket",
@@ -14,18 +13,22 @@ args = getResolvedOptions(sys.argv,
     ]
 )
 
-job_name = args["JOB_NAME"]
-resource_bucket = args["resource_bucket"]
-data_bucket = args["data_bucket"]
+job_name = job_args["JOB_NAME"]
+resource_bucket = job_args["resource_bucket"]
+data_bucket = job_args["data_bucket"]
 
 spark_context = SparkContext()
-glueContext = GlueContext(spark_context)
-spark = glueContext.spark_session
-job = Job(glueContext)
-job.init(job_name, args)
+glue_context = GlueContext(spark_context)
+spark = glue_context.spark_session
+logger = glue_context.get_logger()
 
+
+job = Job(glue_context)
+job.init(job_name, job_args)
+
+logger.info("Creating tables")
 # Identify resource bucket and file type
-resource_node = glueContext.create_dynamic_frame.from_options(
+resource_node = glue_context.create_dynamic_frame.from_options(
     format_options = {
         "quoteChar": '"',
         "withHeader": True,
@@ -43,6 +46,7 @@ resource_node = glueContext.create_dynamic_frame.from_options(
     transformation_ctx = "resource_node",
 )
 
+logger.info("Mapping tables")
 # Based off of file type, list headers
 # (would probably want to find a way to automate this)
 transformation_node = ApplyMapping.apply(
@@ -55,8 +59,9 @@ transformation_node = ApplyMapping.apply(
     transformation_ctx = "transformation_node",
 )
 
+logger.info("Finding output node")
 # Write transformed data into correct file type/format
-output_node = glueContext.getSink(
+output_node = glue_context.getSink(
     path = data_bucket,
     connection_type = "s3",
     updateBehavior = "LOG",
@@ -72,5 +77,6 @@ output_node.setCatalogInfo(
 output_node.setFormat("glueparquet")
 output_node.writeFrame(transformation_node)
 
+logger.info("finished job")
 # Finishing job
 job.commit()

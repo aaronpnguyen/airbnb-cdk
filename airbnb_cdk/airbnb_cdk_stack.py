@@ -40,21 +40,12 @@ class AirbnbCdkStack(cdk.Stack):
             destination_bucket = resource_bucket # Where we send the resource
         )
 
-        aws_s3_deployment.BucketDeployment(
-            self,
-            "nguyen-airbnb-data-deployment", # Name of bucket
-            sources = [ # Sources must be directories or zip files
-                aws_s3_deployment.Source.asset("transformed_data")
-            ],
-            destination_bucket = data_bucket # Where we send the resource
-        )
-
         # Glue scripts
         aws_s3_deployment.BucketDeployment(
             self,
             "nguyen-airbnb-glue-deployment",
             sources = [
-                aws_s3_deployment.Source.asset("src")
+                aws_s3_deployment.Source.asset("src/glue")
             ],
             destination_bucket = glue_bucket
         )
@@ -63,15 +54,17 @@ class AirbnbCdkStack(cdk.Stack):
             "s3:ListBucket",
             "s3:ListBuckets",
             "s3:ListAllMyBuckets",
-            "s3:GetBucketLocation"
+            "s3:GetBucketLocation",
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject",
         ]
 
         s3_policy_statement = iam.PolicyStatement(
             actions = [*s3_actions],
+            effect = iam.Effect.ALLOW,
             resources = [
-                resource_bucket.bucket_arn,
-                data_bucket.bucket_arn, 
-                glue_bucket.bucket_arn,
+                "*"
             ]
         )
 
@@ -82,7 +75,7 @@ class AirbnbCdkStack(cdk.Stack):
         airbnb_lambda = aws_lambda.Function(self, "airbnb_lambda",
             runtime = aws_lambda.Runtime.PYTHON_3_8,
             handler = "airbnb_lambda.main",
-            code = aws_lambda.Code.from_asset("lambdas")
+            code = aws_lambda.Code.from_asset("src/lambdas")
         )
 
         ####################################
@@ -95,6 +88,41 @@ class AirbnbCdkStack(cdk.Stack):
             database_name = "nguyen-airbnb-db" # Name
         )
 
+        glue_read_actions = [
+            "glue:GetConnection",
+            "glue:GetDatabase",
+            "glue:GetDatabases",
+            "glue:GetTable",
+            "glue:GetTables",
+            "glue:CreateTable",
+            "glue:DeleteTable",
+            "glue:DeleteTable",
+        ]
+
+        glue_policy_statement = iam.PolicyStatement(
+            actions = glue_read_actions,
+            resources = [
+                self.glue_db.catalog_arn,
+                self.glue_db.database_arn
+            ],
+            effect = iam.Effect.ALLOW
+        )
+
+        glue_role = iam.Role(
+            self,
+            "nguyen-airbnb-etl-role",
+            role_name = "nguyen-airbnb-etl",
+            assumed_by = iam.ServicePrincipal("glue.amazonaws.com"),
+            inline_policies = {
+                "glue_policy": iam.PolicyDocument(
+                    statements = [
+                        glue_policy_statement,
+                        s3_policy_statement
+                    ]
+                )
+            }
+        )
+        
         glue.Job(self, "nguyen-airbnb-price-job",
             executable = glue.JobExecutable.python_etl(
                 glue_version = glue.GlueVersion.V3_0,
@@ -105,47 +133,8 @@ class AirbnbCdkStack(cdk.Stack):
                 "--resource_bucket": resource_url,
                 "--data_bucket": data_url
             },
+            role = glue_role,
             description = "airbnb-etl"
-        )
-
-        glue_read_actions = [
-            "glue:GetConnection",
-            "glue:GetDatabase",
-            "glue:GetDatabases",
-            "glue:GetTable",
-            "glue:GetTables",
-        ]
-
-        iam.Role(
-            self,
-            "nguyen-airbnb-etl-role",
-            role_name = "nguyen-airbnb-etl",
-            assumed_by = iam.ServicePrincipal("glue.amazonaws.com"),
-            inline_policies = {
-                "glue_policy": iam.PolicyDocument(
-                    statements = [
-                        iam.PolicyStatement(
-                            actions = [
-                                *glue_read_actions,
-                                "glue:CreateTable",
-                                "glue:DeleteTable",
-                            ],
-                            resources = [
-                                self.glue_db.catalog_arn,
-                                self.glue_db.database_arn
-                            ]
-                        )
-                    ]
-                )
-            }
-        )
-
-        glue_policy_statement = iam.PolicyStatement(
-            actions = glue_read_actions,
-            resources = [
-                self.glue_db.catalog_arn,
-                self.glue_db.database_arn
-            ]
         )
         
         ####################################
