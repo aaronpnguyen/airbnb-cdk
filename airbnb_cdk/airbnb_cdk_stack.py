@@ -69,16 +69,6 @@ class AirbnbCdkStack(cdk.Stack):
         )
 
         ####################################
-        #              Lambda!             #
-        ####################################
-
-        airbnb_lambda = aws_lambda.Function(self, "airbnb_lambda",
-            runtime = aws_lambda.Runtime.PYTHON_3_8,
-            handler = "airbnb_lambda.main",
-            code = aws_lambda.Code.from_asset("src/lambdas")
-        )
-
-        ####################################
         #              Glue!               #
         ####################################
 
@@ -141,7 +131,7 @@ class AirbnbCdkStack(cdk.Stack):
         #            DynamoDb!             #
         ####################################
 
-        test_table = dynamodb.Table(
+        lambda_record = dynamodb.Table(
             self,
             "nguyen-test-table",
             billing_mode = dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -151,7 +141,20 @@ class AirbnbCdkStack(cdk.Stack):
             partition_key = dynamodb.Attribute(name = "id", type = dynamodb.AttributeType.STRING),
         )
 
-        test_table.grant_read_write_data(airbnb_lambda.role)
+        ####################################
+        #              Lambda!             #
+        ####################################
+
+        airbnb_lambda = aws_lambda.Function(self, "airbnb_lambda",
+            runtime = aws_lambda.Runtime.PYTHON_3_8,
+            handler = "airbnb_lambda.main",
+            code = aws_lambda.Code.from_asset("src/lambdas"),
+            environment = {
+                "DYNAMODB_TABLE": lambda_record.table_name
+            }
+        )
+
+        lambda_record.grant_read_write_data(airbnb_lambda.role)
 
         ####################################
         #            Policies!             #

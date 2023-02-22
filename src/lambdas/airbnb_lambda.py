@@ -15,7 +15,7 @@ def main(event, context):
 
     response = table.put_item(
         Item = {
-            "id": f"{dynamodb_content['Count'] + 1}",
+            "id": f"{int(dynamodb_content['Count']) + 1}",
             "description": "Lambda deployed!"
         }
     )
