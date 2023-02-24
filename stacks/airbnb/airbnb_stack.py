@@ -9,7 +9,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-class AirbnbCdkStack(cdk.Stack):
+class AirbnbStack(cdk.Stack):
     # Self refers to this specific stack!
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -19,12 +19,12 @@ class AirbnbCdkStack(cdk.Stack):
         ####################################
 
         # Deploying buckets that will contain either resources or transformed data
-        resource_bucket = aws_s3.Bucket(self, "nguyen-airbnb-resource-bucket")
-        data_bucket = aws_s3.Bucket(self, "nguyen-airbnb-data-bucket")
-        glue_bucket = aws_s3.Bucket(self, "nguyen-airbnb-glue-bucket")
+        self.resource_bucket = aws_s3.Bucket(self, "nguyen-airbnb-resource-bucket")
+        self.data_bucket = aws_s3.Bucket(self, "nguyen-airbnb-data-bucket")
+        self.glue_bucket = aws_s3.Bucket(self, "nguyen-airbnb-glue-bucket")
 
-        resource_url = resource_bucket.s3_url_for_object()
-        data_url = data_bucket.s3_url_for_object()
+        resource_url = self.resource_bucket.s3_url_for_object()
+        data_url = self.data_bucket.s3_url_for_object()
 
         ####################################
         #          Bucket Resources!       #
@@ -37,7 +37,7 @@ class AirbnbCdkStack(cdk.Stack):
             sources = [ # Sources must be directories or zip files
                 aws_s3_deployment.Source.asset("resources")
             ],
-            destination_bucket = resource_bucket # Where we send the resource
+            destination_bucket = self.resource_bucket # Where we send the resource
         )
 
         # Glue scripts
@@ -47,7 +47,7 @@ class AirbnbCdkStack(cdk.Stack):
             sources = [
                 aws_s3_deployment.Source.asset("src/glue")
             ],
-            destination_bucket = glue_bucket
+            destination_bucket = self.glue_bucket
         )
 
         s3_actions = [
@@ -63,9 +63,7 @@ class AirbnbCdkStack(cdk.Stack):
         s3_policy_statement = iam.PolicyStatement(
             actions = [*s3_actions],
             effect = iam.Effect.ALLOW,
-            resources = [
-                "*"
-            ]
+            resources = ["*"]
         )
 
         ####################################
@@ -85,7 +83,6 @@ class AirbnbCdkStack(cdk.Stack):
             "glue:GetTable",
             "glue:GetTables",
             "glue:CreateTable",
-            "glue:DeleteTable",
             "glue:DeleteTable",
         ]
 
@@ -116,7 +113,7 @@ class AirbnbCdkStack(cdk.Stack):
         glue.Job(self, "nguyen-airbnb-price-job",
             executable = glue.JobExecutable.python_etl(
                 glue_version = glue.GlueVersion.V3_0,
-                script = glue.Code.from_bucket(glue_bucket, 'airbnb_price_script.py'),
+                script = glue.Code.from_bucket(self.glue_bucket, 'airbnb_price_script.py'),
                 python_version = glue.PythonVersion.THREE,
             ),
             default_arguments = {
