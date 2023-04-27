@@ -48,9 +48,8 @@ class SnowflakeStack(cdk.Stack):
             self,
             "nguyen-snowflake-access-role",
             role_name = "nguyen-snowflake-access-role",
-            assumed_by = iam.ArnPrincipal(snowflake_arn),
+            assumed_by = iam.ArnPrincipal(snowflake_arn), 
             external_ids = [snowflake_id],
             inline_policies = {"nguyen-snowflake-access-policies": snowflake_access_policy}
         )
-
         
