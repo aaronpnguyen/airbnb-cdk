@@ -18,9 +18,9 @@ on:
         type: boolean
 
 jobs:
-  if: ${{ inputs.logLevel }} == 'dev'
-    print-tag:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Print the input tag to STDOUT
-          run: echo  The input given is ${{ inputs.logLevel }}
+  print-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print the input tag to STDOUT
+        run: echo  The input given is ${{ inputs.logLevel }}
+        if: ${{ inputs.logLevel }} == 'dev'
