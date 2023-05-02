@@ -24,8 +24,3 @@ jobs:
       steps:
         - name: Print the input tag to STDOUT
           run: echo  The input given is ${{ inputs.logLevel }}
-  
-  run-job:
-    if: ${{ inputs.logLevel }} == 'dev'
-      name: Print the input tag to STDOUT
-        run: echo  The input given is ${{ inputs.logLevel }}
