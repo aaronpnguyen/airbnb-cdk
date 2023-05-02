@@ -24,6 +24,7 @@ jobs:
   run-staging-smoke-test:
     if: ${{ inputs.logLevel == 'staging' }}
     runs-on: ubuntu-latest
+    steps:
       - name: Print the input tag to STDOUT in STAGING
         run: echo  The input given is deployment for staging
         if: ${{ inputs.logLevel }} == 'staging'
@@ -31,6 +32,7 @@ jobs:
   run-prod-smoke-test:
     if: ${{ inputs.logLevel == 'prod' }}
     runs-on: ubuntu-latest
+    steps:
       - name: Print the input tag to STDOUT in PROD
         run: echo  The input given is deployment for production
         if: ${{ inputs.logLevel }} == 'prod'
