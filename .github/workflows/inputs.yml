@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       log-level:
-        description: do you need to be in quotes
+        description: 'do you need to be in quotes'
         required: true
-        default: dev
+        default: 'dev'
         type: choice
         options:
-          - dev
-          - staging
-          - prod
+          - 'dev'
+          - 'staging'
+          - 'prod'
 
 jobs:
   run-dev-smoke-test:
