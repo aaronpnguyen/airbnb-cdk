@@ -4,27 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'
+        description: 'env'
         required: true
-        default: 'warning'
+        default: 'dev'
         type: choice
         options:
-          - info
-          - warning
-          - debug
+          - dev
+          - staging
+          - prod
       print_tags:
         description: 'True to print to STDOUT'
         required: true
         type: boolean
-      tags:
-        description: 'Test scenario tags'
-        required: true
-        type: string
 
 jobs:
   print-tag:
     runs-on: ubuntu-latest
-    if:  ${{ inputs.print_tags }} 
     steps:
       - name: Print the input tag to STDOUT
-        run: echo  The tags are ${{ inputs.tags }}
+        run: echo  The input given is ${{ inputs.logLevel }}
