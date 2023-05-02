@@ -18,9 +18,15 @@ on:
         type: boolean
 
 jobs:
-  print-tag:
+  run-environment-smoke-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Print the input tag to STDOUT
-        run: echo  The input given is ${{ inputs.logLevel }}
+      - name: Print the input tag to STDOUT in DEV
+        run: echo  The input given is deployment for devs
         if: ${{ inputs.logLevel }} == 'dev'
+      - name: Print the input tag to STDOUT in STAGING
+        run: echo  The input given is deployment for devs
+        if: ${{ inputs.logLevel }} == 'staging'
+      - name: Print the input tag to STDOUT in PROD
+        run: echo  The input given is deployment for devs
+        if: ${{ inputs.logLevel }} == 'prod'
