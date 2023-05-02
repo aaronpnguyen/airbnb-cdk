@@ -1,4 +1,4 @@
-name: Inputs test
+name: Inputs testing
 
 on:
   workflow_dispatch:
