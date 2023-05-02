@@ -9,27 +9,27 @@ on:
         default: 'dev'
         type: choice
         options:
-          - 'dev'
-          - 'staging'
-          - 'prod'
+          - dev
+          - staging
+          - prod
 
 jobs:
   run-dev-smoke-test:
-    if: ${{ inputs.log-level == 'dev' }}
+    if: ${{ inputs.log-level == dev }}
     runs-on: ubuntu-latest
     steps:
       - name: Print the input tag to STDOUT in DEV
         run: echo  The input given is deployment for devs
 
   run-staging-smoke-test:
-    if: ${{ inputs.log-level == 'staging' }}
+    if: ${{ inputs.log-level == staging }}
     runs-on: ubuntu-latest
     steps:
       - name: Print the input tag to STDOUT in STAGING
         run: echo  The input given is deployment for staging
 
   run-prod-smoke-test:
-    if: ${{ inputs.log-level == 'prod' }}
+    if: ${{ inputs.log-level == prod }}
     runs-on: ubuntu-latest
     steps:
       - name: Print the input tag to STDOUT in PROD
