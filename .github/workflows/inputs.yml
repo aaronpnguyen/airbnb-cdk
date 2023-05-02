@@ -15,21 +15,21 @@ on:
 
 jobs:
   run-dev-smoke-test:
-    if: ${{ inputs.logLevel }} == 'dev'
+    if: ${{ inputs.logLevel == 'dev '}}
     runs-on: ubuntu-latest
     steps:
       - name: Print the input tag to STDOUT in DEV
         run: echo  The input given is deployment for devs
 
   run-staging-smoke-test:
-    if: ${{ inputs.logLevel }} == 'staging'
+    if: ${{ inputs.logLevel == 'staging' }}
     runs-on: ubuntu-latest
       - name: Print the input tag to STDOUT in STAGING
         run: echo  The input given is deployment for staging
         if: ${{ inputs.logLevel }} == 'staging'
 
   run-prod-smoke-test:
-    if: ${{ inputs.logLevel }} == 'prod'
+    if: ${{ inputs.logLevel == 'prod' }}
     runs-on: ubuntu-latest
       - name: Print the input tag to STDOUT in PROD
         run: echo  The input given is deployment for production
