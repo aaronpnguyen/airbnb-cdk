@@ -15,7 +15,7 @@ on:
 
 jobs:
   run-dev-smoke-test:
-    if: ${{ inputs.logLevel }} == 'dev'
+    if: ${{ inputs.logLevel }} == dev
     runs-on: ubuntu-latest
     steps:
       - name: Print the input tag to STDOUT in DEV
