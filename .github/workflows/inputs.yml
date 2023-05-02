@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       log-level:
-        description: 'env'
+        description: do you need to be in quotes
         required: true
         default: 'dev'
         type: choice
