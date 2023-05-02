@@ -18,11 +18,14 @@ on:
         type: boolean
 
 jobs:
-  print-tag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print the input tag to STDOUT
-        run: echo  The input given is ${{ inputs.logLevel }}
-
   if: ${{ inputs.logLevel }} == 'dev'
-    run: print-tag
+    print-tag:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Print the input tag to STDOUT
+          run: echo  The input given is ${{ inputs.logLevel }}
+  
+  run-job:
+    if: ${{ inputs.logLevel }} == 'dev'
+      name: Print the input tag to STDOUT
+        run: echo  The input given is ${{ inputs.logLevel }}
