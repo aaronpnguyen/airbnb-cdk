@@ -6,7 +6,7 @@ on:
       log-level:
         description: 'do you need to be in quotes'
         required: true
-        default: 'dev'
+        default: 'staging'
         type: choice
         options:
           - 'dev'
