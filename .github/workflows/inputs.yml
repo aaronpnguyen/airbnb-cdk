@@ -12,10 +12,6 @@ on:
           - dev
           - staging
           - prod
-      print_tags:
-        description: 'True to print to STDOUT'
-        required: true
-        type: boolean
 
 jobs:
   run-environment-smoke-test:
@@ -25,8 +21,8 @@ jobs:
         run: echo  The input given is deployment for devs
         if: ${{ inputs.logLevel }} == 'dev'
       - name: Print the input tag to STDOUT in STAGING
-        run: echo  The input given is deployment for devs
+        run: echo  The input given is deployment for staging
         if: ${{ inputs.logLevel }} == 'staging'
       - name: Print the input tag to STDOUT in PROD
-        run: echo  The input given is deployment for devs
+        run: echo  The input given is deployment for production
         if: ${{ inputs.logLevel }} == 'prod'
